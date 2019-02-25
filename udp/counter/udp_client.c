@@ -7,6 +7,7 @@
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
+#include <time.h>
 
 #define PORT	 8080 
 #define MAXLINE 1024 
@@ -31,20 +32,16 @@ int main() {
 	servaddr.sin_port = htons(PORT); 
 	servaddr.sin_addr.s_addr = INADDR_ANY; 
 	
-	int n, len; 
+	while(1) {
+		int n, len; 
 	
-	sendto(sockfd, (const char *)hello, strlen(hello), 
-		MSG_CONFIRM, (const struct sockaddr *) &servaddr, 
+		sendto(sockfd, (const char *)hello, strlen(hello), 
+			MSG_CONFIRM, (const struct sockaddr *) &servaddr, 
 			sizeof(servaddr)); 
-	printf("Hello message sent.\n"); 
-		
-	n = recvfrom(sockfd, (char *)buffer, MAXLINE, 
-				MSG_WAITALL, (struct sockaddr *) &servaddr, 
-				&len); 
-	buffer[n] = '\0'; 
-	printf("Server : %s\n", buffer); 
+		printf("Hello message sent.\n"); 
+        }
 
-	close(sockfd); 
+	//close(sockfd); 
 	return 0; 
 } 
 

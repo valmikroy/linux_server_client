@@ -5,18 +5,25 @@
 #include <string.h> 
 #include <sys/types.h> 
 #include <sys/socket.h> 
+#include <sys/time.h>
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
+#include <time.h>
+
 
 #define PORT   8080 
-#define MAXLINE 1024 
+#define MAXLINE 10240
 
 // Driver code 
 int main() { 
   int sockfd; 
-  char buffer[MAXLINE]; 
+  //char buffer = NULL;
   char *hello = "Hello from server"; 
   struct sockaddr_in servaddr, cliaddr; 
+
+  //time_t start, stop; 
+  long start, stop; 
+  struct timeval timecheck;
   
   // Creating socket file descriptor 
   if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -40,16 +47,35 @@ int main() {
     exit(EXIT_FAILURE); 
   } 
   
-  int len, n; 
-  n = recvfrom(sockfd, (char *)buffer, MAXLINE, 
-        MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
-        &len); 
-  buffer[n] = '\0'; 
-  printf("Client : %s\n", buffer); 
-  sendto(sockfd, (const char *)hello, strlen(hello), 
-    MSG_CONFIRM, (const struct sockaddr *) &cliaddr, 
-      len); 
-  printf("Hello message sent.\n"); 
-  
+
+  start = 0;
+  stop = 0;
+  int cnt = 0;
+  size_t b = 0;
+  while(1) {
+	   
+       
+	int len, n; 
+  	char buffer[MAXLINE]; 
+	if ( ( stop - start ) > 1000 ) {
+      		//printf("Time elapsed in ms: %ld\n", stop - start);
+		gettimeofday(&timecheck, NULL);
+	  	start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+	        printf("pps:  %d  MiB: %d  MB: %d\n", cnt, (b/1024/1024), (b/1000/1000) );
+	        cnt = 0;
+                b = 0;
+	}
+ 
+
+
+	  n = recv(sockfd,(char *)buffer,&len,MSG_WAITALL);
+          b = b + (sizeof(buffer)/sizeof(int));
+	  cnt++;
+
+	  gettimeofday(&timecheck, NULL);
+	  stop =  (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
+  }
+
   return 0; 
 } 

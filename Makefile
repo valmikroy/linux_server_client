@@ -1,10 +1,10 @@
 default: all
 
 all:
-	-gcc -o tcp_server tcp_server.c
-	-gcc -o tcp_client tcp_client.c
-	-gcc -o udp_server udp_server.c
-	-gcc -o udp_client udp_client.c
+	-gcc -o tcp/simple_loop/tcp_server tcp/simple_loop/tcp_server.c
+	-gcc -o tcp/simple_loop/tcp_client tcp/simple_loop/tcp_client.c
+	-gcc -o udp/simple/udp_server udp/simple/udp_server.c
+	-gcc -o udp/simple/udp_client udp/simple/udp_client.c
 
 clean:
-	-rm -rf tcp_server tcp_client udp_server udp_client
+	-rm -rf tcp/simple_loop/tcp_server tcp/simple_loop/tcp_client udp/simple/udp_server udp/simple/udp_client
