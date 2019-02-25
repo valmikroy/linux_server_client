@@ -13,10 +13,24 @@
 #define SA struct sockaddr 
 
 
+
+void read_loop(int sockfd)
+{
+
+	char buff[MAX]; 
+	for (;;) { 
+		bzero(buff, MAX); 
+		read(sockfd, buff, sizeof(buff)); 
+		printf("From Server : %s\n", buff); 
+		fflush(stdout);
+		sleep(2);
+	}
+
+}
+
 void readfunc(int sockfd)
 {
 	char buff[MAX]; 
-	unsigned long t;
         //int flags =1;
         //setsockopt(sockfd, SOL_TCP, TCP_NODELAY, (void *)&flags, sizeof(flags));
 
@@ -64,7 +78,8 @@ int main()
 	else
 		printf("connected to the server..\n"); 
 
-        readfunc(sockfd);
+        //readfunc(sockfd);
+	read_loop(sockfd);
 
 	// close the socket 
 	close(sockfd); 

@@ -14,10 +14,24 @@
 #define SA struct sockaddr 
 
 
+
+void write_loop(int sockfd)
+{
+	
+	char buff[MAX]; 
+	for (;;) {
+		bzero(buff, MAX); 
+		sprintf(buff,"%d",(unsigned long)time(NULL));
+		write(sockfd, buff, sizeof(buff));
+		sleep(2);
+	}
+}
+
+
+
 void timefunc(int sockfd)
 {
 	char buff[MAX]; 
-	unsigned long t;
         //int flags =1;
         //setsockopt(sockfd, SOL_TCP, TCP_NODELAY, (void *)&flags, sizeof(flags));
 
@@ -86,7 +100,8 @@ int main()
 	else
 		printf("server acccept the client...\n"); 
 
-	timefunc(connfd);
+	//timefunc(connfd);
+	write_loop(connfd);
 
 	// After chatting close the socket 
 	close(sockfd); 
