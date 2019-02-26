@@ -84,6 +84,7 @@ void udpRecvLoop(int sockfd) {
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
       printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=recv\thost=%s\n", (long)timecheck.tv_sec, cnt, b, hostname);
+      fflush(stdout);
       cnt = 0;
       b = 0;
     }
