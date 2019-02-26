@@ -12,7 +12,6 @@
 #include <fcntl.h>
 #include <getopt.h>
 
-#include "udp_common.h"
 #include "udp_client.h"
 
 #define UDP_ADDRESS "127.0.0.1"
@@ -86,7 +85,7 @@ void udpSendtoLoop(){
     if ((stop - start) > 1000) {
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\t host=%s\n",(long)timecheck.tv_sec, cnt, b,hostname);
+      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\thost=%s\n",(long)timecheck.tv_sec, cnt, b,hostname);
       cnt = 0;
       b = 0;
     }
