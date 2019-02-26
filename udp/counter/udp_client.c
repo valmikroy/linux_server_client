@@ -12,8 +12,8 @@
 #include <fcntl.h>
 #include <getopt.h>
 
+#include "udp_common.h"
 #include "udp_client.h"
-
 
 #define UDP_ADDRESS "127.0.0.1"
 #define UDP_PORT 8080
@@ -40,15 +40,11 @@ void display_usage() {
     exit( EXIT_FAILURE );
 }
 
-
-
-
 void read_random(char *b) {
     int fp = open("/dev/urandom", O_RDONLY);
     read(fp, &b, sizeof(b));
     close(fp);
 }
-
 
 int udpSocket() {
   int sockfd;
@@ -74,9 +70,13 @@ struct sockaddr_in udpSockaddr(char *addr,int port) {
 }
 
 
+
 void udpSendtoLoop(){
   int sockfd = udpSocket();
   long start, stop, b, cnt = 0 ;
+  char hostname[1024];
+  gethostname(hostname, 1024);
+
   struct timeval timecheck;
 
   struct sockaddr_in servaddr = udpSockaddr(cmdArgs.udp_address,cmdArgs.udp_port);
@@ -86,14 +86,13 @@ void udpSendtoLoop(){
     if ((stop - start) > 1000) {
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-      printf("%ld\tpps=%ld\t\tbytes=%ld\n",(long)timecheck.tv_sec, cnt, b);
+      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\t host=%s\n",(long)timecheck.tv_sec, cnt, b,hostname);
       cnt = 0;
       b = 0;
     }
     char buffer[cmdArgs.udp_payload];
-    int n;
     read_random(buffer);
-    n = sendto(sockfd, (const char *)buffer, sizeof(buffer), MSG_CONFIRM,
+    int n = sendto(sockfd, (const char *)buffer, sizeof(buffer), MSG_CONFIRM,
            (const struct sockaddr *)&servaddr, sizeof(servaddr));
     //printf("bytes sent %d\n",n);
     b += n;
