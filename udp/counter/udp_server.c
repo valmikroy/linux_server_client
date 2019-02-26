@@ -57,7 +57,7 @@ int main() {
       // printf("Time elapsed in ms: %ld\n", stop - start);
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-      printf("pps:  %d  bytes: %ld\n", cnt, b);
+      //printf("%ld\tpps:  %d  bytes: %ld\n", timecheck.tv_sec, cnt, b);
       cnt = 0;
       b = 0;
     }

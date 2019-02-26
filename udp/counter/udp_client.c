@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -20,12 +21,13 @@
 
 
 
+
 static const char *optString = "a:p:s:v?";
 static const struct option longOpts[] = {
   { "verbose", no_argument,NULL,'v'},
   { "udp_address", required_argument, NULL, 'a' },
   { "udp_port", required_argument, NULL, 'p' },
-  { "udp_payload", optional_argument, NULL, 's' },
+  { "udp_payload", required_argument, NULL, 's' },
   {NULL, 0, NULL, 0}
 };
 
@@ -74,15 +76,30 @@ struct sockaddr_in udpSockaddr(char *addr,int port) {
 
 void udpSendtoLoop(){
   int sockfd = udpSocket();
+  long start, stop, b, cnt = 0 ;
+  struct timeval timecheck;
+
   struct sockaddr_in servaddr = udpSockaddr(cmdArgs.udp_address,cmdArgs.udp_port);
 
   for (;;) {
+
+    if ((stop - start) > 1000) {
+      gettimeofday(&timecheck, NULL);
+      start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+      printf("%ld\tpps=%ld\t\tbytes=%ld\n",(long)timecheck.tv_sec, cnt, b);
+      cnt = 0;
+      b = 0;
+    }
     char buffer[cmdArgs.udp_payload];
     int n;
     read_random(buffer);
     n = sendto(sockfd, (const char *)buffer, sizeof(buffer), MSG_CONFIRM,
            (const struct sockaddr *)&servaddr, sizeof(servaddr));
-    printf("bytes sent %d\n",n);
+    //printf("bytes sent %d\n",n);
+    b += n;
+    cnt++;
+    gettimeofday(&timecheck, NULL);
+    stop = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
   }
 }
 
