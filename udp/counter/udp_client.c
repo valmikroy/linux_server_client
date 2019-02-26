@@ -72,7 +72,10 @@ struct sockaddr_in udpSockaddr(char *addr,int port) {
 
 void udpSendtoLoop(){
   int sockfd = udpSocket();
-  long start, stop, b, cnt = 0 ;
+  long start=0;
+  long stop=0;
+  long b=0;
+  long cnt = 0;
   char hostname[1024];
   gethostname(hostname, 1024);
 

@@ -71,7 +71,10 @@ int udpBindSocket() {
 
 void udpRecvLoop(int sockfd) {
 
-  long start, stop, b, cnt = 0;
+  long start=0;
+  long stop=0;
+  long b=0;
+  long cnt=0;
   size_t len;
   struct timeval timecheck;
   char buffer[UDP_PAYLOAD];
