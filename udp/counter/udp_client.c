@@ -11,6 +11,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <sys/utsname.h>
+#include <netdb.h>
+
 
 #include "udp_client.h"
 
@@ -20,7 +23,7 @@
 
 
 
-
+char hostname[1024];
 static const char *optString = "a:p:s:v?";
 static const struct option longOpts[] = {
   { "verbose", no_argument,NULL,'v'},
@@ -43,6 +46,23 @@ void read_random(char *b) {
     int fp = open("/dev/urandom", O_RDONLY);
     read(fp, &b, sizeof(b));
     close(fp);
+}
+
+void get_hostname(){
+        gethostname(hostname,1024);
+        struct addrinfo hints={0};
+        struct addrinfo* res=0;
+        hints.ai_family=AF_UNSPEC;
+        hints.ai_flags=AI_CANONNAME;
+
+        if (getaddrinfo(hostname,0,&hints,&res)==0) {
+            strcpy(hostname,res->ai_canonname);
+            freeaddrinfo(res);
+        }
+        else {
+          strcpy(hostname,UDP_ADDRESS);
+        }
+
 }
 
 int udpSocket() {
@@ -75,9 +95,7 @@ void udpSendtoLoop(){
   long start=0;
   long stop=0;
   long b=0;
-  long cnt = 0;
-  char hostname[1024];
-  gethostname(hostname, 1024);
+  long cnt=0;
 
   struct timeval timecheck;
 
@@ -88,7 +106,7 @@ void udpSendtoLoop(){
     if ((stop - start) > 1000) {
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\thost=%s\n",(long)timecheck.tv_sec, cnt, b,hostname);
+      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\thost=%s\n",(long)timecheck.tv_sec, cnt, b,cmdArgs.udp_address);
       cnt = 0;
       b = 0;
     }
@@ -110,6 +128,7 @@ int main(int argc, char *argv[]) {
   int longIndex = 0;
 
   cmdArgs.verbose = 0;
+  get_hostname(hostname, 1024);
   cmdArgs.udp_address = UDP_ADDRESS;
   cmdArgs.udp_port = UDP_PORT;
   cmdArgs.udp_payload = UDP_PAYLOAD;

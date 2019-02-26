@@ -10,6 +10,9 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/utsname.h>
+#include <netdb.h>
+
 
 #include "udp_server.h"
 
@@ -17,6 +20,7 @@
 #define UDP_PORT 8080
 #define UDP_PAYLOAD 10240
 
+char hostname[1024];
 static const char *optString = "a:p:v?";
 static const struct option longOpts[] = {
     {"verbose", no_argument, NULL, 'v'},
@@ -30,6 +34,23 @@ void display_usage() {
   puts("-a --udp_address \t\t UDP address");
   puts("-p --udp_port    \t\t UDP port");
   exit(EXIT_FAILURE);
+}
+
+void get_hostname(){
+        gethostname(hostname,1024);
+        struct addrinfo hints={0};
+        struct addrinfo* res=0;
+        hints.ai_family=AF_UNSPEC;
+        hints.ai_flags=AI_CANONNAME;
+
+        if (getaddrinfo(hostname,0,&hints,&res)==0) {
+            strcpy(hostname,res->ai_canonname);
+            freeaddrinfo(res);
+        }
+        else {
+          strcpy(hostname,UDP_ADDRESS);
+        }
+
 }
 
 int udpSocket() {
@@ -78,15 +99,13 @@ void udpRecvLoop(int sockfd) {
   size_t len;
   struct timeval timecheck;
   char buffer[UDP_PAYLOAD];
-  char hostname[1024];
-  gethostname(hostname, 1024);
 
   for (;;) {
 
     if ((stop - start) > 1000) {
       gettimeofday(&timecheck, NULL);
       start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=recv\thost=%s\n", (long)timecheck.tv_sec, cnt, b, hostname);
+      printf("%ld\tpps=%ld\t\tbytes=%ld\t\ttype=recv\thost=%s\n", (long)timecheck.tv_sec, cnt, b, cmdArgs.udp_address);
       fflush(stdout);
       cnt = 0;
       b = 0;
@@ -107,6 +126,7 @@ int main(int argc, char *argv[]) {
   int longIndex = 0;
 
   cmdArgs.verbose = 0;
+  get_hostname(hostname, 1024);
   cmdArgs.udp_address = UDP_ADDRESS;
   cmdArgs.udp_port = UDP_PORT;
 
