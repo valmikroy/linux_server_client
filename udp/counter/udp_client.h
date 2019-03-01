@@ -5,6 +5,7 @@ struct cmdArgs_t {
   int udp_port;
   long udp_payload;
   int threads;
+  int interval;
 } cmdArgs;
 
 

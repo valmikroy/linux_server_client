@@ -21,15 +21,15 @@
 #define UDP_ADDRESS "127.0.0.1"
 #define UDP_PORT 8080
 #define UDP_PAYLOAD 1472
-#define THREADS 1
-
+#define THREADS 4
+#define INTERVAL 60
 
 
 
 
 
 char hostname[1024];
-static const char *optString = "a:p:t:s:v?";
+static const char *optString = "a:p:t:i:s:v?";
 pthread_t tid[100];
 pthread_mutex_t lock;
 long bytes=0;
@@ -48,6 +48,7 @@ static const struct option longOpts[] = {
   { "udp_port", required_argument, NULL, 'p' },
   { "udp_payload", required_argument, NULL, 's' },
   { "threads", required_argument, NULL, 't' },
+  { "interval", required_argument, NULL, 'i' },
   {NULL, 0, NULL, 0}
 };
 
@@ -58,6 +59,7 @@ void display_usage() {
     puts( "-p --udp_port    \t\t UDP port");
     puts( "-s --udp_payload \t\t UDP payload size");
     puts( "-t --threads \t\t Number of client threads");
+    puts( "-i --interval \t\t Timing interval between spawning new threads");
     exit( EXIT_FAILURE );
 }
 
@@ -136,7 +138,6 @@ void udpSendtoLoop(){
 
     if ((stop - start) > 1000) {
       displayReadings((long)timecheck.tv_sec);
-
     }
     char buffer[cmdArgs.udp_payload];
     read_random(buffer);
@@ -159,6 +160,7 @@ int main(int argc, char *argv[]) {
   cmdArgs.udp_port = UDP_PORT;
   cmdArgs.udp_payload = UDP_PAYLOAD;
   cmdArgs.threads = THREADS;
+  cmdArgs.interval = INTERVAL;
 
   opt = getopt_long(argc, argv, optString, longOpts, &longIndex );
   while(opt != -1 ) {
@@ -178,6 +180,9 @@ int main(int argc, char *argv[]) {
       case 't':
         cmdArgs.threads = atoi(optarg);
         break;
+      case 'i':
+        cmdArgs.interval = atoi(optarg);
+        break;
       case 'h':
       case '?':
         display_usage();
@@ -196,8 +201,15 @@ int main(int argc, char *argv[]) {
   }
 
   int i;
-  for(i = 0; i < cmdArgs.threads ; i++)
+  for(i = 0; i < cmdArgs.threads ; i++) {
     pthread_create(&(tid[i]), NULL, &udpSendtoLoop, NULL);
+    sleep(cmdArgs.interval);
+  }
+  sleep(cmdArgs.interval);
+
+  for(i = 0; i < cmdArgs.threads ; i++)
+    pthread_cancel(tid[i]);
+
 
   pthread_exit(NULL);
   pthread_mutex_destroy(&lock);
