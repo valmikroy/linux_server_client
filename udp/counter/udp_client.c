@@ -122,7 +122,7 @@ void displayReadings(long ts) {
   pthread_mutex_lock(&lock);
   gettimeofday(&timecheck, NULL);
   start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
-  printf("timestamp=%ld\tpps=%ld\t\tbytes=%ld\t\ttype=send\tdst=%s\tsrc=%s\n", ts, count, bytes, cmdArgs.udp_address,hostname);
+  printf("timestamp=%ld\tpps=%ld\t\tbytes=%ld\t\ttype=udp_send\tdst=%s\tsrc=%s\n", ts, count, bytes, cmdArgs.udp_address,hostname);
   fflush(stdout);
   count = 0;
   bytes = 0;
